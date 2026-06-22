@@ -1,10 +1,21 @@
 # Machine History & Maintenance
 
-Production-ready migration of the original Google Apps Script / Excel prototype into a modern web application for machine history and maintenance management.
+A production-oriented migration of the original Google Apps Script / Excel prototype into a modern maintenance-management web application.
 
-## Prototype behavior preserved
+## What was migrated from the prototype
 
-The old app managed machine master data, spare part lifetime schedules, maintenance logs, defect reports, pending defect resolution, and dashboard counts for active/inactive machines, pending/critical defects, overdue parts, and due-soon parts. This Next.js version keeps those workflows while using normalized Supabase tables and maintainable TypeScript components.
+The reviewed prototype files (`Code.gs`, `Index.html`, `docs/Excel_VBA_Migration.md`, and the original `README.md`) showed these core workflows:
+
+- Machine master list and dashboard cards.
+- Machine profile report with basic information, active pending defects, spare part schedule, maintenance history, and full defect history.
+- Maintenance log creation for `Repair`, `Part Replacement`, and `PM` actions.
+- Pending defect report creation and repair-time defect resolution with root cause, corrective action, resolver, and linked maintenance ID.
+- Spare part replacement schedule upsert by `Machine_ID + Part_ID` with next due date calculated from part lifetime.
+- Status calculations: `OVERDUE`, `DUE_SOON` within 30 days, otherwise `OK`.
+- Dashboard counts for active/inactive machines, pending defects, critical pending defects, overdue parts, and due-soon parts.
+- Audit logging for maintenance creation, defect reporting, defect resolution, and schedule updates.
+
+See `docs/Prototype_Review.md` for a detailed feature/field mapping.
 
 ## Tech stack
 
@@ -14,16 +25,17 @@ The old app managed machine master data, spare part lifetime schedules, maintena
 - Supabase Postgres/Auth/RLS
 - Vercel deployment
 
-## Features
+## Main features
 
-- Dashboard with machine availability, MTBF, MTTR, breakdown rate, PM completion, overdue PM, parts due, and status summary.
+- Dashboard with machine availability, MTBF, MTTR, breakdown rate, PM completion rate, overdue PM, due spare parts, pending defects, critical pending defects, and status summary.
 - Machine Master and Machine Detail pages.
-- Breakdown records with severity/status lifecycle.
-- Spare Part Master and replacement history.
-- Preventive maintenance plans and records.
-- Reports / KPI summary with date-filter UI.
-- Settings page for reference values and internal auth/role model.
-- Responsive sidebar/top navigation, tables, empty states, forms, clear buttons, and delete-confirmation guidance.
+- Breakdown/defect lifecycle pages with prototype severity and status values.
+- Spare Part Master and replacement schedule pages.
+- Maintenance log model that supports repair, replacement, and PM workflows.
+- Preventive Maintenance Plans and Records.
+- Reports/KPI page with date-filter UI.
+- Settings page documenting role and reference-value configuration.
+- Responsive industrial dashboard layout with tables, badges, search/filter controls, form shells, loading/empty-state-ready table components, and delete-confirmation-ready button patterns.
 
 ## Local setup
 
@@ -32,7 +44,7 @@ npm install
 npm run dev
 ```
 
-Without Supabase environment variables, the app uses built-in demo data so pages can render immediately.
+If Supabase environment variables are absent, the app falls back to bundled demo data so pages can render during local setup.
 
 ## Environment variables
 
@@ -43,29 +55,39 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
-A Supabase service-role key is not required for the current app. If future admin-only background jobs need it, keep it server-only and never expose it to browser code.
+A Supabase service-role key is not required for normal browser/server rendering. If future admin jobs need a service-role key, keep it server-only and never expose it to client components.
 
 ## Supabase setup
 
 1. Create a Supabase project.
-2. Run `supabase/migrations/001_initial_schema.sql`.
+2. Run `supabase/migrations/001_initial_schema.sql` using the Supabase SQL editor or Supabase CLI.
 3. Optionally run `supabase/seed/seed.sql` for demo data.
 4. Enable Supabase Auth for internal users.
-5. Insert rows in `profiles` for each authenticated user with `admin`, `technician`, or `viewer` role.
+5. Insert matching `profiles` rows for authenticated users with `admin`, `technician`, or `viewer` role.
 
 ## Data migration
 
-See `docs/Data_Migration_Guide.md`. In short: export legacy sheets as CSV, import machines and spare parts first, then defects, replacement records, PM records, and PM plans. Convert all dates to ISO `YYYY-MM-DD` and convert spare part lifetime years to months.
+See `docs/Data_Migration_Guide.md`.
+
+High-level steps:
+
+1. Export legacy sheets as CSV.
+2. Import machines and spare parts first.
+3. Convert spare part lifetime years to lifetime months.
+4. Import defect logs into `breakdown_records`.
+5. Import maintenance rows into `maintenance_logs`, plus replacement or PM-specific tables based on action type.
+6. Recalculate next due dates and validate dashboard counts against the old prototype.
 
 ## Vercel deployment
 
 1. Push this repository to GitHub.
-2. Import the project in Vercel.
+2. Import the repository in Vercel.
 3. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel Project Settings.
-4. Deploy. The app uses `next build` and is compatible with the App Router.
+4. Deploy with the default `next build` command.
 
 ## Known limitations / next steps
 
-- Mutating Add/Edit/Delete buttons are UI-ready but should be connected to server actions after finalizing role approval rules.
-- KPI date filters are scaffolded; production reporting should pass date ranges into Supabase queries.
-- Authentication screens can be added once the company sign-in method is selected.
+- Add authenticated mutation server actions for final Add/Edit/Delete behavior once user roles are confirmed.
+- Add a dedicated login screen and route protection after the company chooses its Supabase Auth provider.
+- Add date-range filtering to KPI queries in Supabase rather than only the report UI controls.
+- Add automated tests once package installation is available in CI.

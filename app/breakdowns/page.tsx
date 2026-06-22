@@ -1,5 +1,33 @@
 import { DataTable } from '@/components/DataTable';
-import { FormShell } from '@/components/FormShell';
+import { PageHeader } from '@/components/PageHeader';
+import { RecordForm } from '@/components/RecordForm';
 import { StatusBadge } from '@/components/StatusBadge';
 import { getData } from '@/lib/data';
-export default async function Page(){ const data=await getData(); const rows=data.breakdowns as any[]; return <div className="space-y-6"><div><h1 className="text-2xl font-bold">Breakdown Records</h1><p className="text-sm text-slate-500">Search, filter, add, edit, and delete workflows are represented with production-ready table and form states; wire buttons to server actions for live mutations.</p></div><div className="flex gap-2"><input className="input max-w-md" placeholder="Search records..."/><button className="btn-secondary">Filter</button><button className="btn-primary">Add New</button></div><DataTable rows={rows} columns={Object.keys(rows[0]??{empty:'No schema'}).slice(0,6).map((key)=>({key,header:key.replaceAll('_',' '),render:(row:any)=> String(row[key] ?? '—')}))}/><FormShell title="Add / Edit Breakdown Records"><label className="text-sm font-medium">Primary field<input className="input mt-1" placeholder="Enter value"/></label><label className="text-sm font-medium">Status<select className="input mt-1"><option>Active</option><option>Inactive</option></select></label><div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 md:col-span-2">Delete actions should use confirmation dialogs before calling Supabase.</div></FormShell></div>}
+
+export default async function Page() {
+  const data = await getData();
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Breakdown Records" description="Replacement for prototype Defect_Log: sequential defect IDs, date found, symptom, severity, reporter, status, root cause, corrective action, resolver, and linked maintenance entry." />
+      <div className="flex flex-wrap gap-2"><input className="input max-w-md" placeholder="Search defect, symptom, machine..." /><select className="input max-w-48"><option>All severities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select><button className="btn-primary">Report Defect</button></div>
+      <DataTable rows={data.breakdowns} columns={[
+        { key: 'code', header: 'Defect ID', render: (record) => record.defect_code },
+        { key: 'machine', header: 'Machine', render: (record) => data.machines.find((machine) => machine.id === record.machine_id)?.machine_code ?? '—' },
+        { key: 'date', header: 'Date Found', render: (record) => record.date_found },
+        { key: 'symptom', header: 'Symptom', render: (record) => record.symptom },
+        { key: 'severity', header: 'Severity', render: (record) => <StatusBadge value={record.severity} /> },
+        { key: 'status', header: 'Status', render: (record) => <StatusBadge value={record.status} /> },
+        { key: 'reported', header: 'Reported By', render: (record) => record.reported_by },
+      ]} />
+      <RecordForm title="Report / Resolve Defect">
+        <label className="text-sm font-medium">Machine<select className="input mt-1">{data.machines.map((machine) => <option key={machine.id}>{machine.machine_code} — {machine.name}</option>)}</select></label>
+        <label className="text-sm font-medium">Date Found<input className="input mt-1" type="date" /></label>
+        <label className="text-sm font-medium md:col-span-2">Symptom<textarea className="input mt-1" rows={3} /></label>
+        <label className="text-sm font-medium">Severity<select className="input mt-1"><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></label>
+        <label className="text-sm font-medium">Reported By<input className="input mt-1" /></label>
+        <label className="text-sm font-medium">Root Cause<input className="input mt-1" /></label>
+        <label className="text-sm font-medium">Corrective Action<input className="input mt-1" /></label>
+      </RecordForm>
+    </div>
+  );
+}

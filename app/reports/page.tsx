@@ -1,2 +1,6 @@
 import { Dashboard } from '@/components/Dashboard';
-export default function Page(){ return <div className="space-y-4"><div><h1 className="text-2xl font-bold">Reports / KPI Summary</h1><p className="text-sm text-slate-500">Use date filters for management reporting; KPI formulas use machine, breakdown, PM, and replacement data.</p></div><div className="card flex flex-wrap gap-3 p-4"><input className="input max-w-48" type="date"/><input className="input max-w-48" type="date"/><button className="btn-primary">Apply Date Filter</button><button className="btn-secondary">Export CSV</button></div><Dashboard/></div>}
+import { PageHeader } from '@/components/PageHeader';
+
+export default function Page() {
+  return <div className="space-y-4"><PageHeader title="Reports / KPI Summary" description="Date-filterable management report area for availability, MTBF, MTTR, breakdown rate, PM completion, overdue PM, and spare parts due." /><div className="card flex flex-wrap gap-3 p-4"><input className="input max-w-48" type="date" aria-label="Start date" /><input className="input max-w-48" type="date" aria-label="End date" /><button className="btn-primary">Apply Date Filter</button><button className="btn-secondary">Export CSV</button></div><Dashboard /></div>;
+}
