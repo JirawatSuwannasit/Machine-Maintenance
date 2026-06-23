@@ -9,14 +9,13 @@ export type Area = { id: string; department_id: string | null; name: string };
 export type Profile = { id: string; full_name: string | null; role: 'admin' | 'technician' | 'viewer'; created_at: string };
 
 export type Machine = {
-  id: string;
-  machine_code: string;
+  machine_id: string;
   scope: string | null;
-  name: string;
+  machine_name: string;
   manufacturer: string | null;
   model: string | null;
   serial_number: string | null;
-  operating_range: string | null;
+  range: string | null;
   operation_date: string | null;
   status: MachineStatus;
   department_id: string | null;

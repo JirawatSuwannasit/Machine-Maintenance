@@ -49,10 +49,10 @@ export async function Dashboard() {
       <section>
         <h2 className="mb-3 text-lg font-semibold">Machine Cards</h2>
         <DataTable rows={data.machines} columns={[
-          { key: 'machine', header: 'Machine', render: (machine) => <Link className="font-semibold text-blue-800" href={`/machines/${machine.id}`}>{machine.machine_code} · {machine.name}</Link> },
+          { key: 'machine', header: 'Machine', render: (machine) => <Link className="font-semibold text-blue-800" href={`/machines/${machine.machine_id}`}>{machine.machine_id} · {machine.machine_name}</Link> },
           { key: 'scope', header: 'Scope', render: (machine) => machine.scope ?? '—' },
           { key: 'manufacturer', header: 'Manufacturer', render: (machine) => `${machine.manufacturer ?? '—'} ${machine.model ?? ''}` },
-          { key: 'defects', header: 'Pending Defects', render: (machine) => data.breakdowns.filter((breakdown) => breakdown.machine_id === machine.id && breakdown.status === 'Pending').length },
+          { key: 'defects', header: 'Pending Defects', render: (machine) => data.breakdowns.filter((breakdown) => breakdown.machine_id === machine.machine_id && breakdown.status === 'Pending').length },
           { key: 'status', header: 'Status', render: (machine) => <StatusBadge value={machine.status} /> },
         ]} />
       </section>
@@ -60,7 +60,7 @@ export async function Dashboard() {
       <section>
         <h2 className="mb-3 text-lg font-semibold">Spare Parts Schedule</h2>
         <DataTable rows={data.replacements} columns={[
-          { key: 'machine', header: 'Machine', render: (replacement) => data.machines.find((machine) => machine.id === replacement.machine_id)?.machine_code ?? '—' },
+          { key: 'machine', header: 'Machine', render: (replacement) => data.machines.find((machine) => machine.machine_id === replacement.machine_id)?.machine_id ?? '—' },
           { key: 'part', header: 'Part', render: (replacement) => data.spareParts.find((part) => part.id === replacement.spare_part_id)?.name ?? '—' },
           { key: 'last', header: 'Last Changed', render: (replacement) => replacement.replacement_date },
           { key: 'due', header: 'Next Due', render: (replacement) => `${replacement.next_due_date ?? '—'} (${daysUntil(replacement.next_due_date)}d)` },
@@ -72,7 +72,7 @@ export async function Dashboard() {
         <h2 className="mb-3 text-lg font-semibold">Recent Breakdown / Defect Reports</h2>
         <DataTable rows={recentBreakdowns} columns={[
           { key: 'defect', header: 'Defect', render: (breakdown) => breakdown.defect_code },
-          { key: 'machine', header: 'Machine', render: (breakdown) => data.machines.find((machine) => machine.id === breakdown.machine_id)?.machine_code ?? '—' },
+          { key: 'machine', header: 'Machine', render: (breakdown) => data.machines.find((machine) => machine.machine_id === breakdown.machine_id)?.machine_id ?? '—' },
           { key: 'symptom', header: 'Symptom', render: (breakdown) => breakdown.symptom },
           { key: 'severity', header: 'Severity', render: (breakdown) => <StatusBadge value={breakdown.severity} /> },
           { key: 'status', header: 'Status', render: (breakdown) => <StatusBadge value={breakdown.status} /> },

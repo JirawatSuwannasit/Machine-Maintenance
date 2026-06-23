@@ -53,6 +53,7 @@ Copy `.env.example` to `.env.local`:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY= # server-only; required only for npm run import:machines
 ```
 
 A Supabase service-role key is not required for normal browser/server rendering. If future admin jobs need a service-role key, keep it server-only and never expose it to client components.
@@ -68,6 +69,16 @@ A Supabase service-role key is not required for normal browser/server rendering.
 ## Data migration
 
 See `docs/Data_Migration_Guide.md`.
+### Import machine master data
+
+`Machine_List.csv` can be imported into the Supabase `machines` table with an idempotent upsert. The script reads the CSV from the repository root, trims text fields, converts `Operation_Date` values such as `30/4/1998` to ISO dates, and uses `machine_id` as the primary-key conflict target.
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run import:machines
+```
+
+Keep `SUPABASE_SERVICE_ROLE_KEY` server-only. Do not add it to client components or expose it with a `NEXT_PUBLIC_` prefix.
+
 
 High-level steps:
 
