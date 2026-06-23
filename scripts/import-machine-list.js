@@ -109,6 +109,7 @@ async function main() {
   });
 
   const { data, error } = await supabase
+    .schema('public')
     .from('machines')
     .upsert(machines, { onConflict: 'machine_code' })
     .select('machine_code,name,scope,status');
