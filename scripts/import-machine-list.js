@@ -6,7 +6,7 @@ const { createClient } = require('@supabase/supabase-js');
 const CSV_PATH = path.join(process.cwd(), 'Machine_List.csv');
 const SUPABASE_SCHEMA = 'public';
 const MACHINES_TABLE = 'machines';
-const REQUIRED_COLUMNS = ['Machine_ID', 'SCOPE', 'Machine_Name'];
+const REQUIRED_COLUMNS = ['Machine_ID', 'SCOPE', 'Machine_Name', 'Manufacturer', 'Model', 'SN', 'Range'];
 
 function parseCsv(text) {
   const rows = [];
@@ -89,6 +89,10 @@ async function main() {
       machine_code: machineCode,
       scope: trimToNull(record.SCOPE),
       name,
+      manufacturer: trimToNull(record.Manufacturer),
+      model: trimToNull(record.Model),
+      serial_number: trimToNull(record.SN),
+      range: trimToNull(record.Range),
     };
   }).filter(Boolean);
 

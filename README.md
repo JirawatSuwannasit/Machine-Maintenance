@@ -72,7 +72,7 @@ See `docs/Data_Migration_Guide.md`.
 
 ### Import machine master data
 
-`Machine_List.csv` can be imported into `public.machines` with an idempotent upsert. The import script reads the CSV from the repository root, trims text fields, maps `Machine_ID` to `machine_code`, `SCOPE` to `scope`, and `Machine_Name` to `name`, and never writes `Machine_ID` into the generated UUID `id` column.
+`Machine_List.csv` can be imported into `public.machines` with an idempotent upsert. The import script reads the CSV from the repository root, trims text fields, maps `Machine_ID` to `machine_code`, `SCOPE` to `scope`, `Machine_Name` to `name`, `Manufacturer` to `manufacturer`, `Model` to `model`, `SN` to `serial_number`, and `Range` to `range`, and never writes `Machine_ID` into the generated UUID `id` column.
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run import:machines
