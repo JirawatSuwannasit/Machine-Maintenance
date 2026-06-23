@@ -6,8 +6,7 @@ const { createClient } = require('@supabase/supabase-js');
 const CSV_PATH = path.join(process.cwd(), 'Machine_List.csv');
 const SUPABASE_SCHEMA = 'public';
 const MACHINES_TABLE = 'machines';
-const REQUIRED_COLUMNS = ['Machine_ID', 'SCOPE', 'Machine_Name', 'Manufacturer', 'Model', 'SN', 'Range', 'Operation_Date', 'Status'];
-const VALID_STATUSES = new Set(['Active', 'Inactive', 'Maintenance', 'Down']);
+const REQUIRED_COLUMNS = ['Machine_ID', 'SCOPE', 'Machine_Name'];
 
 function parseCsv(text) {
   const rows = [];
@@ -48,17 +47,8 @@ function parseCsv(text) {
   return rows;
 }
 
-function normalizeDate(value) {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  const match = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (!match) return trimmed;
-  const [, day, month, year] = match;
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-}
-
-function emptyToNull(value) {
-  const trimmed = value.trim();
+function trimToNull(value) {
+  const trimmed = String(value ?? '').trim();
   return trimmed === '' ? null : trimmed;
 }
 
@@ -72,37 +62,33 @@ async function main() {
 
   const csv = fs.readFileSync(CSV_PATH, 'utf8').replace(/^\uFEFF/, '');
   const [headerRow, ...dataRows] = parseCsv(csv);
+
+  if (!headerRow) {
+    throw new Error(`No header row found in ${CSV_PATH}.`);
+  }
+
   const headers = headerRow.map((header) => header.trim().replace(/^\uFEFF/, ''));
   const missingColumns = REQUIRED_COLUMNS.filter((column) => !headers.includes(column));
-  if (missingColumns.length > 0) throw new Error(`Missing CSV columns: ${missingColumns.join(', ')}`);
 
-  const skipped = [];
+  if (missingColumns.length > 0) {
+    throw new Error(`Missing CSV columns: ${missingColumns.join(', ')}`);
+  }
+
+  const skippedRows = [];
   const machines = dataRows.map((row, index) => {
     const record = Object.fromEntries(headers.map((header, columnIndex) => [header, row[columnIndex] ?? '']));
-    const machineCode = record.Machine_ID.trim();
-    const name = record.Machine_Name.trim();
-    const status = record.Status.trim() || 'Active';
+    const machineCode = trimToNull(record.Machine_ID);
+    const name = trimToNull(record.Machine_Name);
 
     if (!machineCode || !name) {
-      skipped.push({ row: index + 2, reason: 'Machine_ID and Machine_Name are required.' });
-      return null;
-    }
-
-    if (!VALID_STATUSES.has(status)) {
-      skipped.push({ row: index + 2, machine_code: machineCode, reason: `Invalid Status: ${status}` });
+      skippedRows.push({ row: index + 2, reason: 'Machine_ID and Machine_Name are required.' });
       return null;
     }
 
     return {
       machine_code: machineCode,
-      scope: emptyToNull(record.SCOPE),
+      scope: trimToNull(record.SCOPE),
       name,
-      manufacturer: emptyToNull(record.Manufacturer),
-      model: emptyToNull(record.Model),
-      serial_number: emptyToNull(record.SN),
-      range: emptyToNull(record.Range),
-      operation_date: normalizeDate(record.Operation_Date),
-      status,
     };
   }).filter(Boolean);
 
@@ -114,12 +100,12 @@ async function main() {
     .schema(SUPABASE_SCHEMA)
     .from(MACHINES_TABLE)
     .upsert(machines, { onConflict: 'machine_code' })
-    .select('machine_code,name,scope,status');
+    .select('machine_code');
 
   const summary = {
     rowsRead: dataRows.length,
     rowsInsertedOrUpdated: data?.length ?? machines.length,
-    skippedRows: skipped,
+    skippedRows,
     errors: error ? [error.message] : [],
   };
 

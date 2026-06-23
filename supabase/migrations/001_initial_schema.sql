@@ -26,13 +26,14 @@ create table profiles (
 );
 
 create table machines (
-  machine_id text primary key,
+  id uuid primary key default gen_random_uuid(),
+  machine_code text unique not null,
   scope text,
-  machine_name text not null,
+  name text not null,
   manufacturer text,
   model text,
   serial_number text,
-  range text,
+  operating_range text,
   operation_date date,
   status machine_status not null default 'Active',
   department_id uuid references departments(id),
@@ -43,7 +44,7 @@ create table machines (
 
 create table machine_status_logs (
   id uuid primary key default gen_random_uuid(),
-  machine_id text not null references machines(machine_id) on delete cascade,
+  machine_id uuid not null references machines(id) on delete cascade,
   old_status machine_status,
   new_status machine_status not null,
   reason text,
@@ -66,7 +67,7 @@ create sequence defect_code_seq start 1;
 create table breakdown_records (
   id uuid primary key default gen_random_uuid(),
   defect_code text unique not null default ('DF-' || lpad(nextval('defect_code_seq')::text, 4, '0')),
-  machine_id text not null references machines(machine_id) on delete cascade,
+  machine_id uuid not null references machines(id) on delete cascade,
   date_found date not null,
   symptom text not null,
   severity defect_severity not null,
@@ -83,7 +84,7 @@ create table breakdown_records (
 
 create table maintenance_logs (
   id uuid primary key default gen_random_uuid(),
-  machine_id text not null references machines(machine_id) on delete cascade,
+  machine_id uuid not null references machines(id) on delete cascade,
   action_type maintenance_action not null,
   spare_part_id uuid references spare_parts(id),
   linked_breakdown_id uuid references breakdown_records(id),
@@ -100,7 +101,7 @@ alter table breakdown_records add constraint breakdown_linked_maintenance_fk for
 
 create table spare_part_replacement_records (
   id uuid primary key default gen_random_uuid(),
-  machine_id text not null references machines(machine_id) on delete cascade,
+  machine_id uuid not null references machines(id) on delete cascade,
   spare_part_id uuid not null references spare_parts(id),
   replacement_date date not null,
   next_due_date date,
@@ -112,7 +113,7 @@ create table spare_part_replacement_records (
 
 create table preventive_maintenance_plans (
   id uuid primary key default gen_random_uuid(),
-  machine_id text not null references machines(machine_id) on delete cascade,
+  machine_id uuid not null references machines(id) on delete cascade,
   name text not null,
   frequency_days int not null check (frequency_days > 0),
   checklist text,
@@ -125,7 +126,7 @@ create table preventive_maintenance_plans (
 create table preventive_maintenance_records (
   id uuid primary key default gen_random_uuid(),
   plan_id uuid references preventive_maintenance_plans(id) on delete set null,
-  machine_id text not null references machines(machine_id) on delete cascade,
+  machine_id uuid not null references machines(id) on delete cascade,
   performed_date date not null,
   completed_by text not null,
   result text not null,
@@ -138,7 +139,7 @@ create table audit_logs (
   actor_id uuid references profiles(id),
   action text not null,
   entity_type text not null,
-  entity_id text,
+  entity_id uuid,
   old_value jsonb,
   new_value jsonb,
   created_at timestamptz not null default now()
