@@ -4,6 +4,8 @@ const path = require('node:path');
 const { createClient } = require('@supabase/supabase-js');
 
 const CSV_PATH = path.join(process.cwd(), 'Machine_List.csv');
+const SUPABASE_SCHEMA = 'public';
+const MACHINES_TABLE = 'machines';
 const REQUIRED_COLUMNS = ['Machine_ID', 'SCOPE', 'Machine_Name', 'Manufacturer', 'Model', 'SN', 'Range', 'Operation_Date', 'Status'];
 const VALID_STATUSES = new Set(['Active', 'Inactive', 'Maintenance', 'Down']);
 
@@ -109,8 +111,8 @@ async function main() {
   });
 
   const { data, error } = await supabase
-    .schema('public')
-    .from('machines')
+    .schema(SUPABASE_SCHEMA)
+    .from(MACHINES_TABLE)
     .upsert(machines, { onConflict: 'machine_code' })
     .select('machine_code,name,scope,status');
 
