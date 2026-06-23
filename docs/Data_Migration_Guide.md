@@ -2,7 +2,7 @@
 
 1. Export each prototype sheet as CSV: `Machine_List`, `Spare_Parts_Master`, `Spare_Parts_Schedule`, `Maintenance_Log`, `Defect_Log`, and `Audit_Log` if present.
 2. Load `supabase/migrations/001_initial_schema.sql` in Supabase SQL Editor or via Supabase CLI.
-3. Import machine rows into `machines`. Map `Machine_ID -> machine_code`, `SCOPE -> scope`, `Machine_Name -> name`, `Manufacturer -> manufacturer`, `Model -> model`, `SN -> serial_number`, `Range -> operating_range`, `Operation_Date -> operation_date`, and `Status -> status`.
+3. Import machine rows into `machines`. Map `Machine_ID -> machine_id`, `SCOPE -> scope`, `Machine_Name -> machine_name`, `Manufacturer -> manufacturer`, `Model -> model`, `SN -> serial_number`, `Range -> range`, `Operation_Date -> operation_date`, and `Status -> status`.
 4. Import `Spare_Parts_Master` into `spare_parts`, converting `Lifetime_Years` to `lifetime_months` by multiplying by 12.
 5. Import `Defect_Log` into `breakdown_records`. Map root cause, corrective action, resolved by, resolved at, and linked maintenance fields when available.
 6. Import every `Maintenance_Log` row into `maintenance_logs`. Keep `maintenance_date`, `action_type`, `details`, `operator`, optional part, optional linked defect, root cause, and corrective action.

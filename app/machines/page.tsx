@@ -17,12 +17,12 @@ export default async function Page() {
         <button className="btn-primary">Add Machine</button>
       </div>
       <DataTable rows={data.machines} columns={[
-        { key: 'code', header: 'Machine ID', render: (machine) => <Link className="font-semibold text-blue-800" href={`/machines/${machine.id}`}>{machine.machine_code}</Link> },
-        { key: 'name', header: 'Name', render: (machine) => machine.name },
+        { key: 'code', header: 'Machine ID', render: (machine) => <Link className="font-semibold text-blue-800" href={`/machines/${machine.machine_id}`}>{machine.machine_id}</Link> },
+        { key: 'name', header: 'Name', render: (machine) => machine.machine_name },
         { key: 'scope', header: 'Scope', render: (machine) => machine.scope ?? '—' },
         { key: 'model', header: 'Manufacturer / Model', render: (machine) => `${machine.manufacturer ?? '—'} / ${machine.model ?? '—'}` },
         { key: 'serial', header: 'Serial No.', render: (machine) => machine.serial_number ?? '—' },
-        { key: 'range', header: 'Range', render: (machine) => machine.operating_range ?? '—' },
+        { key: 'range', header: 'Range', render: (machine) => machine.range ?? '—' },
         { key: 'operation_date', header: 'Operation Date', render: (machine) => machine.operation_date ?? '—' },
         { key: 'status', header: 'Status', render: (machine) => <StatusBadge value={machine.status} /> },
       ]} />

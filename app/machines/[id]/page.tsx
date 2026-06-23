@@ -6,7 +6,7 @@ import { getData, scheduleStatus } from '@/lib/data';
 
 export default async function Page({ params }: { params: { id: string } }) {
   const data = await getData();
-  const machine = data.machines.find((item) => item.id === params.id);
+  const machine = data.machines.find((item) => item.machine_id === params.id);
   if (!machine) notFound();
 
   const breakdowns = data.breakdowns.filter((item) => item.machine_id === params.id);
@@ -17,7 +17,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={`${machine.machine_code} · ${machine.name}`} description="Machine profile report preserving prototype sections: basic information, active defects, spare part schedule, maintenance history, and full defect history." />
+      <PageHeader title={`${machine.machine_id} · ${machine.machine_name}`} description="Machine profile report preserving prototype sections: basic information, active defects, spare part schedule, maintenance history, and full defect history." />
       <section className={`rounded-xl border p-5 ${pendingDefects.length ? 'border-amber-300 bg-amber-50' : 'border-emerald-200 bg-emerald-50'}`}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">Active Defects</h2>
@@ -33,7 +33,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         <dl className="mt-5 grid gap-3 md:grid-cols-4">
           {[
             ['Serial No.', machine.serial_number],
-            ['Range', machine.operating_range],
+            ['Range', machine.range],
             ['Operation Date', machine.operation_date],
             ['Department / Area', machine.department_id ?? machine.area_id],
           ].map(([label, value]) => <div className="rounded-lg bg-slate-50 p-3" key={label}><dt className="text-xs uppercase text-slate-500">{label}</dt><dd className="font-semibold">{value ?? '—'}</dd></div>)}
